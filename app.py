@@ -17,6 +17,17 @@ API = Api(app)
 
 HEART_ATTACK_PROGNOSIS_MODEL = joblib.load('Model/heart-attack-prognosis-model.pkl')
 
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
+
 # ### Creating a class which is responsible for the prognosis of Lung Cancer
 
 class HeartAttackPrognosis(Resource):
@@ -47,7 +58,7 @@ class HeartAttackPrognosis(Resource):
 
         print(out)
 
-        return out
+        return json.dumps(out, cls=NpEncoder)
 
 # ### Adding the predict class as a resource to the API
 API.add_resource(HeartAttackPrognosis, '/prognosis_heart_attack')
